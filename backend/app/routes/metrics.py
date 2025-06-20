@@ -34,7 +34,13 @@ def calculate_metrics():
 
     releases = get_filtered_releases(platform, start_date, end_date)
     if not releases:
-        return jsonify({'error': 'No releases found for the given criteria'}), 404
+        return jsonify({
+            "deployment_frequency": { "value": 0, "trend": 0, "history": [] },
+            "lead_time": { "value": 0, "trend": 0, "history": [] },
+            "change_failure_rate": { "value": 0, "trend": 0, "history": [] },
+            "time_to_restore": { "value": 0, "trend": 0, "history": [] },
+            "note": "No releases found for the given criteria"
+        }), 200
 
     release_ids = [r.id for r in releases]
     incidents = get_filtered_incidents(release_ids, start_date, end_date)
