@@ -1,21 +1,18 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import ErrorAlert from "@/components/ErrorAlert";
-import DatePicker from "@/components/DatePicker";
 import { metrics } from "@/lib/api";
 import type { MetricsData } from "@/lib/api";
 import { SectionCards } from "@/components/section-cards";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { DataTable } from "@/components/data-table";
 
 const DashboardPage = () => {
   const [metricsData, setMetricsData] = useState<MetricsData | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [startDate, setStartDate] = useState<Date>(
+  const [startDate] = useState<Date>(
     new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
   ); // Last 30 days
-  const [endDate, setEndDate] = useState<Date>(new Date());
+  const [endDate] = useState<Date>(new Date());
 
   useEffect(() => {
     fetchMetrics();
@@ -59,7 +56,6 @@ const DashboardPage = () => {
 
           <ChartAreaInteractive />
           
-          {/* <DataTable data={data} /> */}
         </div>
       </div>
     </div>
