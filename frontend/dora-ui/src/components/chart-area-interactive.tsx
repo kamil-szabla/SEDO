@@ -104,7 +104,9 @@ const [selectedPlatform, setSelectedPlatform] = React.useState<string | "Total">
         const startDate = new Date(referenceDate);
         startDate.setDate(startDate.getDate() - daysToSubtract);
 
-        const timeFilteredData = allData.filter(item => {
+        const safeAllData = Array.isArray(allData) ? allData : [];
+
+        const timeFilteredData = safeAllData.filter(item => {
             const date = new Date(item.date);
             return date >= startDate && date <= referenceDate;
         });

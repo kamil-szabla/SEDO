@@ -73,18 +73,20 @@ export const ReleaseTable = ({ releases, onEdit, onDelete }: ReleaseTableProps) 
 
   // Get unique values for filters
   const platforms = React.useMemo(() => 
-    ["all", ...new Set(releases.map(r => r.platform))],
+    ["all", ...new Set((Array.isArray(releases) ? releases : []).map(r => r.platform))],
     [releases]
   );
 
   const releaseTypes = React.useMemo(() => 
-    ["all", ...new Set(releases.map(r => r.release_type))],
+    ["all", ...new Set((Array.isArray(releases) ? releases : []).map(r => r.release_type))],
     [releases]
   );
 
   // Filter releases by date range
   const filteredReleases = React.useMemo(() => {
-    return releases.filter((release) => {
+    const safeReleases = Array.isArray(releases) ? releases : [];
+    
+    return safeReleases.filter((release) => {
       const releaseDate = new Date(release.rollout_date);
       const matchesDate =
         (!startDate || releaseDate >= startDate) &&
