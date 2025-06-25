@@ -29,7 +29,7 @@ jobs:
       - name: Run tests
         run: |
           cd backend
-          pytest
+          PYTHONPATH=$(pwd) pytest
 
   deploy:
     name: Deploy to Render
