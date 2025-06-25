@@ -10,14 +10,14 @@ from datetime import datetime
 def app():
     db_fd, db_path = tempfile.mkstemp()
 
-    app = create_app()
-    app.config.update({
+    config = {
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
         'SQLALCHEMY_TRACK_MODIFICATIONS': False,
         'SECRET_KEY': 'test-secret-key',
         'WTF_CSRF_ENABLED': False
-    })
+    }
+    app = create_app(config)
 
     with app.app_context():
         db.create_all()
