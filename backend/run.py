@@ -1,9 +1,8 @@
-from app import create_app, db
+from app import create_app
+from db_init import init_db
 
 app = create_app()
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        print("Database tables created.")
+    init_db()
     app.run(debug=True, port=5001)
