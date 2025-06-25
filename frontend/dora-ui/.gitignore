@@ -22,3 +22,58 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# Environment variable files
+.env
+*.env
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Flask cache / instance folders
+instance/
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# VSCode settings
+.vscode/
+
+# macOS files
+.DS_Store
+
+# MyPy
+.mypy_cache/
+
+# PyCharm settings
+.idea/
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Test and temp files
+test.db
+temp.db
+*.bak
+*.tmp
+

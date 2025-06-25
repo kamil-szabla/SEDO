@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './components/theme-provider';
+
+import DashboardPage from './pages/DashboardPage';
+import ReleasePage from './pages/ReleasePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import NavBar from './components/NavBar';
+import ProtectedRoute from './components/ProtectedRoute';
+import AuthRoute from './components/AuthRoute';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <Router>
+        <div className="min-h-screen bg-background">
+          <NavBar />
+          <main className="container mx-auto py-6">
+            <Routes>
+              <Route path="/login" element={
+                <AuthRoute>
+                  <LoginPage />
+                </AuthRoute>
+              } />
+              <Route path="/register" element={
+                <AuthRoute >
+                  <RegisterPage />
+                </AuthRoute>
+                } />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/releases"
+                element={
+                  <ProtectedRoute>
+                    <ReleasePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <ReleasePage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </ThemeProvider>
+  );
 }
 
-export default App
+export default App;
