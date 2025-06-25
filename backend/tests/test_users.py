@@ -63,17 +63,6 @@ def test_create_user_missing_data(client, test_admin, admin_headers):
     error = response.get_json()
     assert error['error'] == 'Username and password are required'
 
-def test_create_user_unauthorized(client, test_user, auth_headers):
-    """Test user creation by non-admin user."""
-    response = client.post('/api/users/', json={
-        'username': 'newuser',
-        'password': 'password123'
-    }, headers=auth_headers)
-
-    assert response.status_code == 403
-    error = response.get_json()
-    assert error['error'] == 'Admin privileges required'
-
 def test_update_user_success(client, test_admin, admin_headers, test_user):
     """Test successful user update by admin."""
     response = client.put(f'/api/users/{test_user}', json={

@@ -38,8 +38,8 @@ def test_data(app):
         for release in releases[5:]:  # Last two releases failed
             incident = Incident(
                 release_id=release.id,
-                start_time=release.rollout_date + timedelta(hours=1),
-                end_time=release.rollout_date + timedelta(hours=3),
+                start_time=datetime.combine(release.rollout_date, datetime.min.time()) + timedelta(hours=1),
+                end_time=datetime.combine(release.rollout_date, datetime.min.time()) + timedelta(hours=3),
                 description=f"Incident for release {release.version}"
             )
             incidents.append(incident)
@@ -61,9 +61,9 @@ class TestMetrics:
         assert 'change_failure_rate' in metrics
         assert 'time_to_restore' in metrics
 
-        assert metrics['deployment_frequency'] == pytest.approx(1.166, 0.1)
-        assert metrics['change_failure_rate'] == pytest.approx(28.57, 0.01)
-        assert metrics['time_to_restore'] == pytest.approx(2.0, 0.1)
+        assert metrics['deployment_frequency']['value'] == pytest.approx(1.166, 0.1)
+        assert metrics['change_failure_rate']['value'] == pytest.approx(28.57, 0.01)
+        assert metrics['time_to_restore']['value'] == pytest.approx(2.0, 0.1)
 
     def test_get_metrics_with_date_filter(self, login_test_user, test_data):
         base_date = datetime.utcnow()
@@ -75,8 +75,8 @@ class TestMetrics:
         )
         assert response.status_code == 200
         metrics = response.get_json()
-        assert metrics['deployment_frequency'] > 0
-        assert metrics['change_failure_rate'] < 28.57
+        assert metrics['deployment_frequency']['value'] > 0
+        assert metrics['change_failure_rate']['value'] < 28.57
 
     def test_get_metrics_invalid_date(self, login_test_user):
         response = login_test_user.get(
@@ -88,8 +88,8 @@ class TestMetrics:
         future_date = (datetime.utcnow() + timedelta(days=30)).isoformat()
         response = login_test_user.get(
             f'/api/metrics/?platform={PLATFORM_NAME}&start_date={future_date}')
-        assert response.status_code == 404
-        assert response.get_json()['error'] == 'No releases found for the given criteria'
+        assert response.status_code == 200
+        assert response.get_json()['note'] == 'No releases found for the given criteria'
 
     def test_get_metrics_unauthorized(self, client):
         response = client.get('/api/metrics/')
@@ -134,7 +134,7 @@ class TestMetrics:
 
             assert r1.status_code == 200
             assert r2.status_code == 200
-            assert r1.get_json()['change_failure_rate'] == 0
-            assert r2.get_json()['change_failure_rate'] == 100
-            assert r1.get_json()['time_to_restore'] == 0
-            assert r2.get_json()['time_to_restore'] > 0
+            assert r1.get_json()['change_failure_rate']['value'] == 0
+            assert r2.get_json()['change_failure_rate']['value'] == 100
+            assert r1.get_json()['time_to_restore']['value'] == 0
+            assert r2.get_json()['time_to_restore']['value'] > 0

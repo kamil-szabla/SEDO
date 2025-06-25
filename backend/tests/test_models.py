@@ -1,5 +1,5 @@
 import pytest
-from datetime import datetime
+from datetime import date, datetime
 from app.models import User, Release, Incident
 from app import db
 
@@ -56,7 +56,7 @@ class TestModels:
             assert retrieved_release.platform == "TestPlatform"
             assert retrieved_release.release_type == 'feature'
             assert retrieved_release.is_successful is True
-            assert isinstance(retrieved_release.rollout_date, datetime)
+            assert isinstance(retrieved_release.rollout_date, date)
 
     def test_release_to_dict(self, app):
         """Test Release model to_dict method."""
@@ -79,7 +79,7 @@ class TestModels:
             assert release_dict['version'] == '1.0.0'
             assert release_dict['release_type'] == 'feature'
             assert release_dict['is_successful'] is True
-            assert release_dict['rollout_date'] == release_date.isoformat()
+            assert release_dict['rollout_date'] == release_date.date().isoformat()
 
     def test_incident_creation(self, app):
         """Test Incident model creation and relationships."""
