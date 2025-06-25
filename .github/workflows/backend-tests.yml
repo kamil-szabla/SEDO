@@ -1,0 +1,40 @@
+name: Run Backend Tests and Deploy
+
+on:
+  push:
+    branches:
+      - pre-prod
+      - main
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests with pytest
+        run: pytest tests/
+
+      - name: Deploy to Render (pre-prod)
+        if: github.ref == 'refs/heads/pre-prod'
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_PREPROD }}
+
+      - name: Deploy to Render (prod)
+        if: github.ref == 'refs/heads/main'
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_PROD }}
