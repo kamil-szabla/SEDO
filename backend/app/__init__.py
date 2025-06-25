@@ -17,7 +17,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    CORS(app, origins=["http://localhost:5173", "https://dora-backend-prod.onrender.com/"], supports_credentials=True)
+    CORS(app, origins=["http://localhost:5173", "https://dora-ui.onrender.com"], supports_credentials=True)
 
     @event.listens_for(Engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
