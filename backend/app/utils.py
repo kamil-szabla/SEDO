@@ -9,8 +9,8 @@ def calculate_deployment_frequency(releases: List[Release], start_date: Optional
         return 0.0
     
     filtered_releases = [r for r in releases if 
-                        (not start_date or r.rollout_date >= start_date) and
-                        (not end_date or r.rollout_date <= end_date)]
+                        (not start_date or datetime.combine(r.rollout_date, datetime.min.time()) >= start_date) and
+                        (not end_date or datetime.combine(r.rollout_date, datetime.min.time()) <= end_date)]
     
     if len(filtered_releases) < 2:
         return 0.0
@@ -55,6 +55,49 @@ def calculate_time_to_restore(incidents: List[Incident]) -> float:
         
     return sum(restoration_times) / len(restoration_times)
 
+def calculate_trend(current_value: float, previous_value: float) -> float:
+    """Calculate percentage change between two values"""
+    if previous_value == 0:
+        return 0.0 if current_value == 0 else 100.0
+    return ((current_value - previous_value) / previous_value) * 100
+
+def get_previous_period_dates(start_date: datetime, end_date: datetime) -> tuple[datetime, datetime]:
+    """Calculate the start and end dates for the previous period"""
+    period_length = end_date - start_date
+    previous_end = start_date - timedelta(days=1)
+    previous_start = previous_end - period_length
+    return previous_start, previous_end
+
+def calculate_deployment_frequency_trend(releases: List[Release], start_date: datetime, end_date: datetime) -> float:
+    """Calculate trend for deployment frequency"""
+    current_freq = calculate_deployment_frequency(releases, start_date, end_date)
+    
+    prev_start, prev_end = get_previous_period_dates(start_date, end_date)
+    prev_releases = [r for r in releases if 
+                    datetime.combine(r.rollout_date, datetime.min.time()) >= prev_start and
+                    datetime.combine(r.rollout_date, datetime.min.time()) <= prev_end]
+    prev_freq = calculate_deployment_frequency(prev_releases, prev_start, prev_end)
+    
+    return calculate_trend(current_freq, prev_freq)
+
+def calculate_lead_time_trend(current_releases: List[Release], previous_releases: List[Release]) -> float:
+    """Calculate trend for lead time"""
+    current_lead_time = calculate_lead_time(current_releases)
+    previous_lead_time = calculate_lead_time(previous_releases)
+    return calculate_trend(current_lead_time, previous_lead_time)
+
+def calculate_change_failure_rate_trend(current_releases: List[Release], previous_releases: List[Release]) -> float:
+    """Calculate trend for change failure rate"""
+    current_rate = calculate_change_failure_rate(current_releases)
+    previous_rate = calculate_change_failure_rate(previous_releases)
+    return calculate_trend(current_rate, previous_rate)
+
+def calculate_time_to_restore_trend(current_incidents: List[Incident], previous_incidents: List[Incident]) -> float:
+    """Calculate trend for time to restore"""
+    current_time = calculate_time_to_restore(current_incidents)
+    previous_time = calculate_time_to_restore(previous_incidents)
+    return calculate_trend(current_time, previous_time)
+
 def get_filtered_releases(platform: Optional[str] = None, 
                          start_date: Optional[str] = None,
                          end_date: Optional[str] = None) -> List[Release]:
@@ -65,21 +108,19 @@ def get_filtered_releases(platform: Optional[str] = None,
         query = query.filter_by(platform=platform)
     
     if start_date:
-        query = query.filter(Release.rollout_date >= datetime.fromisoformat(start_date))
+        # Get releases from the previous period as well for trend calculation
+        start_dt = datetime.fromisoformat(start_date)
+        prev_start = start_dt - timedelta(days=30)  # Get extra month of data
+        query = query.filter(Release.rollout_date >= prev_start.date())
     if end_date:
-        query = query.filter(Release.rollout_date <= datetime.fromisoformat(end_date))
+        end_dt = datetime.fromisoformat(end_date)
+        query = query.filter(Release.rollout_date <= end_dt.date())
     
     return query.order_by(Release.rollout_date).all()
 
 def get_filtered_incidents(release_ids: List[int],
                          start_date: Optional[str] = None,
                          end_date: Optional[str] = None) -> List[Incident]:
-    """Get incidents filtered by releases and date range"""
-    query = Incident.query.filter(Incident.release_id.in_(release_ids))
-    
-    if start_date:
-        query = query.filter(Incident.start_time >= datetime.fromisoformat(start_date))
-    if end_date:
-        query = query.filter(Incident.end_time <= datetime.fromisoformat(end_date))
-    
-    return query.all()
+    """Get incidents for the given releases"""
+    return Incident.query.filter(Incident.release_id.in_(release_ids)).all()
+

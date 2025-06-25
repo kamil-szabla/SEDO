@@ -5,6 +5,59 @@ from app import db, bcrypt
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
+
+@bp.route('/register', methods=['POST'])
+def register():
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            current_app.logger.error("No JSON data received")
+            return jsonify({'error': 'No data provided'}), 400
+            
+        if 'username' not in data or 'password' not in data:
+            current_app.logger.error("Missing username or password")
+            return jsonify({'error': 'Username and password required'}), 400
+            
+        # Check if user already exists
+        if User.query.filter_by(username=data['username']).first():
+            current_app.logger.warning(f"Registration failed: Username {data['username']} already exists")
+            return jsonify({'error': 'Username already exists'}), 400
+
+        # Check if email is already registered
+        if 'email' in data and data['email']:
+            if User.query.filter_by(email=data['email']).first():
+                current_app.logger.warning(f"Registration failed: Email {data['email']} already exists")
+                return jsonify({'error': 'Email already registered'}), 400
+        
+        # Create new user
+        password_hash = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+        user = User(
+            username=data['username'],
+            email=data.get('email'),  # Email is optional in the database
+            password_hash=password_hash,
+            role=data.get('role', 'user')  # Default role is 'user'
+        )
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        current_app.logger.info(f"User {user.username} registered successfully")
+        return jsonify({
+            'message': 'User registered successfully',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'role': user.role
+            }
+        }), 201
+            
+    except Exception as e:
+        current_app.logger.error(f"Registration error: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Internal server error'}), 500
+
+
 @bp.route('/login', methods=['POST'])
 def login():
     try:

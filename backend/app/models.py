@@ -1,10 +1,12 @@
 from . import db
 from flask_login import UserMixin
 from datetime import datetime
+from sqlalchemy import Date
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=True)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), default='user')  # 'admin' or 'user'
 
@@ -21,7 +23,7 @@ class Release(db.Model):
     release_type = db.Column(db.String(50))
     is_successful = db.Column(db.Boolean, default=True)
     version = db.Column(db.String(20))
-    rollout_date = db.Column(db.DateTime, default=datetime.utcnow)
+    rollout_date = db.Column(Date, default=lambda: datetime.utcnow().date())
     mcm_link = db.Column(db.String(512))
     ci_job_link = db.Column(db.String(512))
     commit_list_link = db.Column(db.String(512))
