@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User
 from app import db, bcrypt
 
@@ -57,6 +57,10 @@ def register():
         db.session.rollback()
         return jsonify({'error': 'Internal server error'}), 500
 
+
+@bp.route('/status', methods=['GET'])
+def status():
+    return jsonify({'authenticated': current_user.is_authenticated})
 
 @bp.route('/login', methods=['POST'])
 def login():

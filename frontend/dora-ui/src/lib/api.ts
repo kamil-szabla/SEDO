@@ -24,11 +24,15 @@ export interface CreateReleaseData {
 }
 
 export interface LoginResponse {
-  token: string;
   user: {
     id: string;
     username: string;
+    role: string;
   };
+}
+
+export interface AuthStatus {
+  authenticated: boolean;
 }
 
 export interface MetricsData {
@@ -63,32 +67,12 @@ const api = axios.create({
 });
 
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      // Handle 401 Unauthorized
-      if (error.response.status === 401) {
-        localStorage.removeItem('authToken');
-        // Let the component handle navigation
-        return Promise.reject(new Error('Unauthorized'));
-      }
-
       // Return error message from the server if available
       if (error.response.data) {
         const errorMessage = error.response.data.error || error.response.data.message;
@@ -108,13 +92,15 @@ export const auth = {
   },
   login: async (username: string, password: string): Promise<LoginResponse> => {
     const response = await api.post<LoginResponse>('auth/login', { username, password });
-    const { token } = response.data;
-    localStorage.setItem('authToken', token);
     return response.data;
   },
-  logout: (navigate: (path: string) => void) => {
-    localStorage.removeItem('authToken');
+  logout: async (navigate: (path: string) => void) => {
+    await api.post('auth/logout');
     navigate('/login');
+  },
+  status: async (): Promise<AuthStatus> => {
+    const response = await api.get<AuthStatus>('auth/status');
+    return response.data;
   },
 };
 
