@@ -18,6 +18,7 @@ const LoginPage = () => {
 
     try {
       await auth.login(username, password);
+      await new Promise(resolve => setTimeout(resolve, 100))
       navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
