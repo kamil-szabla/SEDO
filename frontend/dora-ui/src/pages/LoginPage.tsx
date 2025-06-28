@@ -17,9 +17,10 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      await auth.login(username, password);
-      await new Promise(resolve => setTimeout(resolve, 100))
-      navigate('/');
+      const response = await auth.login(username, password);
+      if (response.user) {
+        navigate('/');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

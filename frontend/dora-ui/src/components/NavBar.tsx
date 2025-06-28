@@ -1,4 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -10,10 +11,24 @@ import { ModeToggle } from "@/components/mode-toggle";
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const isAuthenticated = !!localStorage.getItem("authToken");
+  const location = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogout = () => {
-    auth.logout(navigate);
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const status = await auth.status();
+        setIsAuthenticated(status.authenticated);
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuthStatus();
+  }, [location.pathname]); // Re-check auth status on route changes
+
+  const handleLogout = async () => {
+    await auth.logout(navigate);
+    setIsAuthenticated(false);
   };
 
   return (
