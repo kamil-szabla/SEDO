@@ -22,7 +22,7 @@ def create_app(config_overrides=None):
         "SESSION_COOKIE_SAMESITE": None,
         "SESSION_COOKIE_SECURE": True, 
         "SESSION_COOKIE_PATH": "/",
-        "SESSION_COOKIE_DOMAIN": ".onrender.com",
+        # "SESSION_COOKIE_DOMAIN": ".onrender.com",
         })
 
     if config_overrides:
