@@ -15,7 +15,9 @@ def app():
         'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
         'SQLALCHEMY_TRACK_MODIFICATIONS': False,
         'SECRET_KEY': 'test-secret-key',
-        'WTF_CSRF_ENABLED': False
+        'WTF_CSRF_ENABLED': False,
+        'SESSION_COOKIE_SECURE': False,
+        'SESSION_COOKIE_DOMAIN': None
     }
     app = create_app(config)
 
