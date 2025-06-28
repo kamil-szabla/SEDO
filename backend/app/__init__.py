@@ -14,13 +14,26 @@ login_manager = LoginManager()
 
 
 def create_app(config_overrides=None):
+def create_app(config_overrides=None):
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    app.config.update({
+    "SESSION_COOKIE_HTTPONLY": True,
+    "SESSION_COOKIE_SAMESITE": "Lax",
+    "SESSION_COOKIE_SECURE": True, 
+    "SESSION_COOKIE_PATH": "/",
+    "SESSION_COOKIE_DOMAIN": "dora-ui.onrender.com",
+    })
 
     if config_overrides:
         app.config.update(config_overrides)
 
-    CORS(app, origins=["http://localhost:5173", "https://dora-ui.onrender.com"], supports_credentials=True)
+    CORS(app, 
+        origins=["http://localhost:5173", "https://dora-ui.onrender.com"], 
+        supports_credentials=True,
+        expose_headers=["Set-Cookie"],
+        allow_headers=["Content-Type", "Authorization"])
 
     @event.listens_for(Engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -50,5 +63,14 @@ def create_app(config_overrides=None):
     app.register_blueprint(releases.bp)
     app.register_blueprint(metrics.bp)
     app.register_blueprint(users.bp)
+
+    @app.after_request
+    def apply_security_headers(response):
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Content-Security-Policy"] = "default-src 'self'"
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        return response
 
     return app
