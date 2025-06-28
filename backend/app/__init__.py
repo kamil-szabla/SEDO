@@ -14,17 +14,16 @@ login_manager = LoginManager()
 
 
 def create_app(config_overrides=None):
-def create_app(config_overrides=None):
     app = Flask(__name__)
     app.config.from_object(Config)
 
     app.config.update({
-    "SESSION_COOKIE_HTTPONLY": True,
-    "SESSION_COOKIE_SAMESITE": "Lax",
-    "SESSION_COOKIE_SECURE": True, 
-    "SESSION_COOKIE_PATH": "/",
-    "SESSION_COOKIE_DOMAIN": "dora-ui.onrender.com",
-    })
+        "SESSION_COOKIE_HTTPONLY": True,
+        "SESSION_COOKIE_SAMESITE": "Lax",
+        "SESSION_COOKIE_SECURE": True, 
+        "SESSION_COOKIE_PATH": "/",
+        "SESSION_COOKIE_DOMAIN": "dora-ui.onrender.com",
+        })
 
     if config_overrides:
         app.config.update(config_overrides)
