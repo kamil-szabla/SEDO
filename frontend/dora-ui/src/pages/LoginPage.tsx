@@ -19,7 +19,12 @@ const LoginPage = () => {
     try {
       const response = await auth.login(username, password);
       if (response.user) {
-        navigate('/');
+        const status = await auth.status();
+        if (status.authenticated) {
+          navigate('/');
+        } else {
+          setError('Authentication verification failed');
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
