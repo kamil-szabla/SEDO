@@ -19,6 +19,7 @@ const LoginPage = () => {
     try {
       const response = await auth.login(username, password);
       if (response.user) {
+        await new Promise(resolve => setTimeout(resolve, 200));
         const status = await auth.status();
         if (status.authenticated) {
           navigate('/');
