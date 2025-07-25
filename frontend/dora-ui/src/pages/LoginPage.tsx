@@ -19,7 +19,7 @@ const LoginPage = () => {
     try {
       const response = await auth.login(username, password);
       if (response.user) {
-        navigate('/');
+        window.location.href = '/';
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
